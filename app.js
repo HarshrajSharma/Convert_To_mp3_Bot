@@ -34,11 +34,4 @@ bot.command('start', ctx => {
     })
   })
 
-// bot.launch()
-expressApp.use(bot.webhookCallback('/secret-path'))
-bot.telegram.setWebhook('<YOUR_CAPSULE_URL>/secret-path')
-
-
-// bot.launch()
-
-expressApp.listen(port, () => console.log(`Listening on ${port}`));
+bot.launch()
