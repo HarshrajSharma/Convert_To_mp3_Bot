@@ -37,6 +37,8 @@ bot.on('audio', (msg) => {
                 })
                 .on('end', () => {
                     bot.sendMessage(chatId, 'File converted successfully!');
+                    bot.sendMessage(chatId, 'Fetching the converted file, please wait .....');
+
                     bot.sendAudio(chatId, 'output.mp3');
                 })
                 .save('output.mp3');
