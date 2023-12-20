@@ -1,37 +1,53 @@
-const express = require('express')
-const expressApp = express()
-const axios = require("axios");
-const path = require("path")
-const port = process.env.PORT || 3000;
-expressApp.use(express.static('static'))
-expressApp.use(express.json());
+const TelegramBot = require('node-telegram-bot-api');
+const ffmpeg = require('fluent-ffmpeg');
+const fs = require('fs');
+const request = require('request');
+const stream = require('stream');
 require('dotenv').config();
 
-const { Telegraf } = require('telegraf');
+const token = process.env.BOT_TOKEN
+const bot = new TelegramBot(token, {polling: true});
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
-
-expressApp.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname + '/index.html'));
+bot.onText(/\/start/, (msg) => {
+    bot.sendMessage(msg.chat.id, "Hello! Send me an audio file and I will convert it to mp3.");
 });
 
-bot.command('start', ctx => {
-    console.log(ctx.from)
-    bot.telegram.sendMessage(ctx.chat.id, 'Hello there! Welcome to the Code Capsules telegram bot.\nI respond to /ethereum. Please try it', {
-    })
-  })
-  
-  bot.command('ethereum', ctx => {
-    var rate;
-    console.log(ctx.from)
-    axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd`)
-    .then(response => {
-      console.log(response.data)
-      rate = response.data.ethereum
-      const message = `Hello, today the ethereum price is ${rate.usd}USD`
-      bot.telegram.sendMessage(ctx.chat.id, message, {
-      })
-    })
-  })
+bot.on('audio', (msg) => {
 
-bot.launch()
+    console.log("Script started");
+    const chatId = msg.chat.id;
+    // console.log(msg.audio)
+    bot.getFileLink(msg.audio.file_id)
+    .then((link) => {
+        
+        console.log('Getting file link .....')
+        bot.sendMessage(chatId, 'File received!')
+
+        const file = fs.createWriteStream('inputFile');
+        const sendReq = request.get(link);
+
+        console.log('Saving file....')
+        bot.sendMessage(chatId, 'Converting file to .mp3 format .....');
+        // save file
+        sendReq.pipe(file).on('close', () => {
+            ffmpeg('inputFile')
+                .toFormat('mp3')
+                .on('error', (err) => {
+                    console.log('An error occurred: ' + err.message);
+                })
+                .on('end', () => {
+                    bot.sendMessage(chatId, 'File converted successfully!');
+                    bot.sendAudio(chatId, 'output.mp3');
+                })
+                .save('output.mp3');
+        });
+    })
+    .catch((err) => {
+        'An error has occurred:' + err.message
+        bot.sendMessage(chatId, 'An error has occurred. Contact developer with the error. Error: ' + err.message);
+    });
+});
+bot.on("polling_error", (error) => {
+    console.error("Polling error:", error);
+    bot.sendMessage(chatId, 'An error has occurred. Contact developer with the error. Error: ' + err.message);
+});
