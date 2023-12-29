@@ -6,7 +6,7 @@
   "debug": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"pm2 link ly8yc5mhlckuhdx s27uzuipcbfyuig && pm2 start app.js",
+    "start":"pm2 link 3okbxd07thc9ns1 2uu1isxf8u5w83o && pm2 start app.js",
     "stop":"pm2 stop app.js",
     "dev":"nodemon app.js"
   },
