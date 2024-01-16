@@ -6,9 +6,9 @@
   "debug": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"pm2 link 3okbxd07thc9ns1 2uu1isxf8u5w83o && pm2 start app.js",
-    "stop":"pm2 stop app.js",
-    "dev":"nodemon app.js"
+    "start": "pm2 link 3okbxd07thc9ns1 2uu1isxf8u5w83o && pm2 start app.js",
+    "stop": "pm2 stop app.js",
+    "dev": "nodemon app.js"
   },
   "author": "Harsh",
   "license": "ISC",

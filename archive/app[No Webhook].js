@@ -1,38 +1,23 @@
-const express = require('express');
-const bodyParser = require('body-parser');
 const TelegramBot = require('node-telegram-bot-api');
-const fs =require('fs');
-const request = require('request');
 const ffmpeg = require('fluent-ffmpeg');
+const fs = require('fs');
+const request = require('request');
+const stream = require('stream');
+require('dotenv').config();
 
-const { setupWebHook } = require('./setUpWebHook');
-const {BOT_TOKEN} = require('./config');
+const token = process.env.BOT_TOKEN
+const bot = new TelegramBot(token, {polling: true});
 
-const bot = new TelegramBot(BOT_TOKEN, { polling: false });
+bot.onText(/\/start/, (msg) => {
+    bot.sendMessage(msg.chat.id, "Hello! Send me an audio file and I will convert it to mp3.");
+});
 
+bot.on('audio', (msg) => {
 
-const app = express();
-app.use(bodyParser.json());
-
-// Handle incoming updates from Telegram
-app.post(`/bot${BOT_TOKEN}`, (req, res) => {
-  const chatId = req.body.message.chat.id;
-  const text = req.body.message.text;
-
-  const audio = req.body.message.audio;
-  console.log(req.body);
-
-  // Check if the command is /start
-  if (text === '/start') {
-    bot.sendMessage(chatId, 'Hello! Send me an audio file and I will convert it to mp3.');
-  }
-
-
-  // When an audio is received
-  if(audio){
     console.log("Script started");
+    const chatId = msg.chat.id;
     // console.log(msg.audio)
-    bot.getFileLink(audio.file_id)
+    bot.getFileLink(msg.audio.file_id)
     .then((link) => {
         
         console.log('Getting file link .....')
@@ -64,13 +49,8 @@ app.post(`/bot${BOT_TOKEN}`, (req, res) => {
         // 'An error has occurred:' + err.message
         bot.sendMessage(chatId, 'An error has occurred. Contact developer with the error. Error: ' + err.message);
     });
-  }
-
-  res.sendStatus(200);
 });
-
-const port = process.env.PORT || 3000;
-app.listen(port, async () => {
-  console.log(`Server is listening on port ${port}`);
-  await setupWebHook();
+bot.on("polling_error", (error) => {
+    console.error("Polling error:", error);
+    bot.sendMessage(chatId, 'An error has occurred. Contact developer with the error. Error: ' + err.message);
 });
