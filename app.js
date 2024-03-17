@@ -14,6 +14,10 @@ const bot = new TelegramBot(BOT_TOKEN, { polling: false });
 const app = express();
 app.use(bodyParser.json());
 
+
+app.get('/', (req, res)=>{
+  res.send('Server Active!');
+})
 // Handle incoming updates from Telegram
 app.post(`/bot${BOT_TOKEN}`, (req, res) => {
   const chatId = req.body.message.chat.id;

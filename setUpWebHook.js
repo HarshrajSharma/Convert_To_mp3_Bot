@@ -12,7 +12,7 @@ const setupWebHook = async () => {
     try {
         setTimeout(async () => {
             console.log('Connecting WebHook....');
-            await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {url: webhookURL,})
+            await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {url: webhookURL})
             .then(response => {
                 console.log('Webhook set successfully:', response.data);
             })

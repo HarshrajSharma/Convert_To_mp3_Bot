@@ -12,6 +12,41 @@ bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "Hello! Send me an audio file and I will convert it to mp3.");
 });
 
+
+bot.on('voice', (msg) => {
+      console.log("Script started (voice message)");
+      const chatId = msg.chat.id;
+      bot.getFileLink(msg.voice.file_id)
+        .then((link) => {
+          console.log('Getting voice message link .....')
+          bot.sendMessage(chatId, 'Voice message received!')
+          const file = fs.createWriteStream('inputFile');
+          const sendReq = request.get(link);
+          console.log('Saving voice message....')
+          bot.sendMessage(chatId, 'Converting voice message to .mp3 format .....');
+          sendReq.pipe(file).on('close', () => {
+            ffmpeg('inputFile')
+              .inputFormat('ogg') // Specify input format as ogg
+              .toFormat('mp3')
+              .on('error', (err) => {
+                console.log('An error occurred: ' + err.message);
+              })
+              .on('end', () => {
+                bot.sendMessage(chatId, 'Voice message converted successfully!');
+                bot.sendMessage(chatId, 'Fetching the converted file, please wait .....');
+                bot.sendAudio(chatId, 'output.mp3');
+              })
+              .save('output.mp3');
+          });
+        })
+        .catch((err) => {
+          console.log('An error has occurred:' + err.message)
+          bot.sendMessage(chatId, 'An error has occurred. Contact developer with the error. Error: ' + err.message);
+        });
+    
+  });
+  
+
 bot.on('audio', (msg) => {
 
     console.log("Script started");
